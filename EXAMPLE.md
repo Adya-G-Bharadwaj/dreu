@@ -1,3 +1,6 @@
+**Student:** Alex Johnson  
+**Mentor:** Dr. Maria Rivera  
+
 # Week 1
 
 **Dates:** 06-02 to 06-08

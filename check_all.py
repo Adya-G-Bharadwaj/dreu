@@ -95,55 +95,116 @@ def fetch_file(repo_url: str, filepath: str, token: str = "") -> str | None:
 
 # ── Google Docs fetching ─────────────────────────────────────────────────────
 
-GDOC_ID_RE = re.compile(r"/document/d/([a-zA-Z0-9_-]+)")
+GDOC_ID_RE      = re.compile(r"/document/d/([a-zA-Z0-9_-]+)")
 WEEK_HEADING_RE = re.compile(r"^#\s+Week\s+(\d+)\s*$", re.MULTILINE)
+NAME_FIELD_RE   = re.compile(r"^(Student|Mentor):\s*(.+)$", re.IGNORECASE | re.MULTILINE)
 
 
 def is_gdoc_url(url: str) -> bool:
     return "docs.google.com/document" in url
 
 
-def gdoc_export_url(url: str) -> str:
-    """Return the plain-text export URL for a Google Doc share link."""
-    m = GDOC_ID_RE.search(url)
+def _gdoc_export_url(doc_url: str, fmt: str) -> str:
+    m = GDOC_ID_RE.search(doc_url)
     if not m:
         return ""
-    doc_id = m.group(1)
-    return f"https://docs.google.com/document/d/{doc_id}/export?format=txt"
+    return f"https://docs.google.com/document/d/{m.group(1)}/export?format={fmt}"
+
+
+def _fetch_url(url: str) -> str | None:
+    try:
+        resp = requests.get(url, timeout=15, allow_redirects=True)
+    except requests.RequestException:
+        return None
+    return resp.text if resp.status_code == 200 else None
+
+
+def gdoc_html_to_text(html: str) -> str:
+    """
+    Convert a Google Docs HTML export to markdown-like plain text.
+
+    Handles two student workflows:
+      Heading-styled doc — h1/h2 tags become # / ## markers, so students can
+                           use Google Docs heading styles for a formatted doc.
+      Plain-text pasted  — literal # and ## inside <p> tags pass through
+                           unchanged (backward-compatible with old template).
+
+    Also normalises the Dates line whether the student typed 'Dates: …' or
+    the old '**Dates:** …' form.
+    """
+    try:
+        from bs4 import BeautifulSoup
+    except ImportError:
+        print("Error: beautifulsoup4 is required for Google Docs support.")
+        print("  pip install beautifulsoup4")
+        sys.exit(1)
+
+    soup = BeautifulSoup(html, "html.parser")
+    lines: list[str] = []
+
+    for el in soup.find_all(["h1", "h2", "p", "li"]):
+        text = el.get_text(" ", strip=True)
+        if not text:
+            continue
+        if el.name == "h1":
+            lines.append(f"# {text}")
+        elif el.name == "h2":
+            lines.append(f"## {text}")
+        elif el.name == "li":
+            lines.append(f"- {text}")
+        else:  # p
+            # Normalise any variant of the Dates line to **Dates:** MM-DD to MM-DD
+            if re.search(r"Dates:\s*\d{2}-\d{2}", text, re.IGNORECASE):
+                date_part = re.sub(r"^.*Dates:\s*", "", text, flags=re.IGNORECASE).strip()
+                lines.append(f"**Dates:** {date_part}")
+            else:
+                lines.append(text)
+
+    return "\n".join(lines)
 
 
 def fetch_gdoc(url: str) -> str | None:
     """
-    Download a Google Doc as plain text. Returns None if inaccessible.
-    The doc must be shared as "Anyone with the link can view".
+    Download a Google Doc as markdown-like plain text for validation.
+    Fetches the HTML export (preserving heading structure) and converts it.
+    The doc must be shared as 'Anyone with the link can view'.
     """
-    export_url = gdoc_export_url(url)
-    if not export_url:
+    html_url = _gdoc_export_url(url, "html")
+    if not html_url:
         return None
-    try:
-        resp = requests.get(export_url, timeout=15, allow_redirects=True)
-    except requests.RequestException:
+    html = _fetch_url(html_url)
+    if html is None:
         return None
-    if resp.status_code != 200:
-        return None
-    # Normalise Windows line endings that Google sometimes returns
-    return resp.text.replace("\r\n", "\n").replace("\r", "\n")
+    return gdoc_html_to_text(html)
+
+
+def extract_gdoc_names(text: str) -> dict[str, str]:
+    """
+    Extract Student/Mentor name fields from the top of the document.
+    Stops at the first '# Week N' heading.
+    Returns e.g. {'Student': 'Alex Johnson', 'Mentor': 'Dr. Rivera'}.
+    """
+    names: dict[str, str] = {}
+    for line in text.splitlines():
+        if re.match(r"^#\s+Week\s+\d+", line):
+            break
+        m = NAME_FIELD_RE.match(line)
+        if m:
+            names[m.group(1).capitalize()] = m.group(2).strip()
+    return names
 
 
 def split_gdoc_by_week(content: str) -> dict[int, str]:
     """
-    Split a Google Doc into per-week sections.
-
-    Splits on '# Week N' headings (the same format used in the Markdown template).
+    Split converted Google Doc text into per-week sections on '# Week N' headings.
     Returns {week_number: section_text} for every week found.
     """
     weeks: dict[int, str] = {}
-    # Find all heading positions
     matches = list(WEEK_HEADING_RE.finditer(content))
     for i, m in enumerate(matches):
         week_num = int(m.group(1))
-        start = m.start()
-        end = matches[i + 1].start() if i + 1 < len(matches) else len(content)
+        start    = m.start()
+        end      = matches[i + 1].start() if i + 1 < len(matches) else len(content)
         weeks[week_num] = content[start:end].strip()
     return weeks
 
@@ -158,30 +219,45 @@ def check_student_gdoc(name: str, doc_url: str, weeks_due: int) -> list[dict]:
             "'Anyone with the link can view'"
         )
         return [
-            {"week": w, "status": STATUS_MISSING if w <= weeks_due else STATUS_FUTURE,
+            {"week": w,
+             "status": STATUS_MISSING if w <= weeks_due else STATUS_FUTURE,
              "errors": [error] if w <= weeks_due else []}
             for w in range(1, NUM_WEEKS + 1)
         ]
 
+    # Document-level: validate Student/Mentor name fields (reported on week 1)
+    doc_names   = extract_gdoc_names(content)
+    name_errors = [
+        f"Missing '{field}:' field at the top of the document"
+        for field in ("Student", "Mentor")
+        if field not in doc_names or not doc_names[field].strip()
+    ]
+
     week_sections = split_gdoc_by_week(content)
-    results = []
+    results: list[dict] = []
 
     for week in range(1, NUM_WEEKS + 1):
         if week > weeks_due:
             results.append({"week": week, "status": STATUS_FUTURE, "errors": []})
             continue
 
+        week_errors: list[str] = []
+        if week == 1:
+            week_errors.extend(name_errors)   # surface name issues on week 1
+
         if week not in week_sections:
-            results.append({"week": week, "status": STATUS_MISSING, "errors": [
+            week_errors.append(
                 f"Week {week} section not found in Google Doc "
-                f"(expected a line '# Week {week}')"
-            ]})
+                f"(expected a '# Week {week}' heading)"
+            )
+            results.append({"week": week, "status": STATUS_MISSING, "errors": week_errors})
         else:
             passed, errors = validate_log(week_sections[week], filename=f"Week {week}")
+            week_errors.extend(errors)
             results.append({
                 "week":   week,
-                "status": STATUS_OK if passed else STATUS_INVALID,
-                "errors": errors,
+                "status": STATUS_OK if not week_errors else STATUS_INVALID,
+                "errors": week_errors,
             })
 
     return results

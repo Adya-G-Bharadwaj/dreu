@@ -1,238 +1,87 @@
 # DREU Research Journal — Google Docs Template
 
-<!--
-HOW TO USE THIS TEMPLATE
-────────────────────────
-1. Create a new Google Doc.
-2. Copy everything below the line "=== START COPYING HERE ===" into your doc.
-   Paste as plain text (Edit → Paste without formatting, or Cmd/Ctrl+Shift+V).
-3. Share the doc: File → Share → "Anyone with the link" → Viewer.
-4. Submit the link to the program via the Google Form.
+## Setup instructions
 
-IMPORTANT: Do NOT use Google Docs heading styles (Heading 1, Heading 2, etc.)
-and do NOT use the Bold button. Type the # and ** characters literally — the
-automated validator depends on them appearing exactly as written.
-
-Replace "MM-DD" dates with the month and day (e.g., 06-16) and fill in each section every week.
-The Notes section is optional; remove it if you don't need it.
--->
-
-=== START COPYING HERE ===
-
-# Week 1
-
-**Dates:** MM-DD to MM-DD
-
-## Goals
-
-
-
-## Approach and Implementation
-
-
-
-## Results
-
-
-
-## Notes
-
-
+1. Go to [docs.google.com](https://docs.google.com) and create a new blank document.
+2. Title the document something like *DREU Journal — Your Name*.
+3. Copy the structure below into your document, following the formatting notes
+   for each element.
+4. Share the doc: **File → Share → Share with others → Change to "Anyone with
+   the link"** and set the role to **Viewer**.
+5. Submit the sharing link via the program Google Form.
 
 ---
 
-# Week 2
+## Document structure
 
-**Dates:** MM-DD to MM-DD
-
-## Goals
-
-
-
-## Approach and Implementation
-
-
-
-## Results
-
-
-
-## Notes
-
-
+Set up your document exactly as shown below. Use the **Format → Paragraph
+styles** menu (or the styles dropdown in the toolbar) to apply heading levels.
 
 ---
 
-# Week 3
+### Header block *(top of document, Normal text style)*
 
-**Dates:** MM-DD to MM-DD
+```
+Student: Your Full Name
+Mentor: Mentor Full Name
+```
 
-## Goals
-
-
-
-## Approach and Implementation
-
-
-
-## Results
-
-
-
-## Notes
-
-
+Both lines are required. Type them as plain text at the very top of the
+document before your first week.
 
 ---
 
-# Week 4
+### Each week *(repeat for all 10 weeks)*
 
-**Dates:** MM-DD to MM-DD
+| Text to type | Style to apply |
+|---|---|
+| `Week 1` | **Heading 1** |
+| `Dates: MM-DD to MM-DD` | Normal text |
+| `Goals` | **Heading 2** |
+| *(your goals content)* | Normal text |
+| `Approach and Implementation` | **Heading 2** |
+| *(your approach content)* | Normal text |
+| `Results` | **Heading 2** |
+| *(your results content)* | Normal text |
+| `Notes` | **Heading 2** *(optional section)* |
+| *(your notes content)* | Normal text |
 
-## Goals
-
-
-
-## Approach and Implementation
-
-
-
-## Results
-
-
-
-## Notes
-
-
+Replace `MM-DD` with the actual month and day (e.g., `06-02 to 06-08`).
 
 ---
 
-# Week 5
+## Example (first week)
 
-**Dates:** MM-DD to MM-DD
+```
+Student: Alex Johnson
+Mentor: Dr. Maria Rivera
 
-## Goals
+Week 1                          ← Heading 1
+Dates: 06-02 to 06-08           ← Normal text
 
+Goals                           ← Heading 2
+Meet with mentor and read the two assigned papers.
+Set up development environment.
 
+Approach and Implementation     ← Heading 2
+Met with Dr. Rivera on Monday for 90 minutes. Read Smith et al. (2023)
+and Chen & Patel (2022), taking structured notes.
 
-## Approach and Implementation
+Results                         ← Heading 2
+Both papers completed and notes shared with mentor. Environment set up
+successfully after resolving one dependency conflict.
 
-
-
-## Results
-
-
-
-## Notes
-
-
-
----
-
-# Week 6
-
-**Dates:** MM-DD to MM-DD
-
-## Goals
-
-
-
-## Approach and Implementation
-
-
-
-## Results
-
-
-
-## Notes
-
-
+Notes                           ← Heading 2 (optional)
+Need to ask about WCAG 2.1 vs 2.2 at next meeting.
+```
 
 ---
 
-# Week 7
+## Self-checking
 
-**Dates:** MM-DD to MM-DD
+The automated validator accepts both formatted docs (heading styles as above)
+and plain-text docs (with literal `#` and `##` characters — see the GitHub
+option). Either approach works; the heading-style format is recommended for
+a better reading experience in Google Docs.
 
-## Goals
-
-
-
-## Approach and Implementation
-
-
-
-## Results
-
-
-
-## Notes
-
-
-
----
-
-# Week 8
-
-**Dates:** MM-DD to MM-DD
-
-## Goals
-
-
-
-## Approach and Implementation
-
-
-
-## Results
-
-
-
-## Notes
-
-
-
----
-
-# Week 9
-
-**Dates:** MM-DD to MM-DD
-
-## Goals
-
-
-
-## Approach and Implementation
-
-
-
-## Results
-
-
-
-## Notes
-
-
-
----
-
-# Week 10
-
-**Dates:** MM-DD to MM-DD
-
-## Goals
-
-
-
-## Approach and Implementation
-
-
-
-## Results
-
-
-
-## Notes
-
-
+Questions? Email [dreu_staff@cra.org](mailto:dreu_staff@cra.org)
