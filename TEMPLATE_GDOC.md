@@ -1,9 +1,9 @@
-# DREU Research Journal — Google Docs Template
+# DREU Research Log — Google Docs Template
 
 ## Setup instructions
 
 1. Go to [docs.google.com](https://docs.google.com) and create a new blank document.
-2. Title the document something like *DREU Journal — Your Name*.
+2. Title the document something like *DREU Research Log — Your Name*.
 3. Copy the structure below into your document, following the formatting notes
    for each element.
 4. Share the doc: **File → Share → Share with others → Change to "Anyone with

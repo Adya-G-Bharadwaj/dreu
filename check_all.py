@@ -11,7 +11,7 @@ Usage:
     python check_all.py --send-email      # check and email students with issues
     python check_all.py --week 4          # override current week (default: auto)
 
-Supports two journal types (auto-detected from the URL in students.csv):
+Supports two log types (auto-detected from the URL in students.csv):
     GitHub repo   — https://github.com/username/repo
     Google Doc    — https://docs.google.com/document/d/DOC_ID/...
                     (must be shared as "Anyone with the link can view")
@@ -309,7 +309,7 @@ def print_report(students_results: list[dict], weeks_due: int):
     col_w = 22
     week_headers = "  ".join(f"W{w:02d}" for w in range(1, NUM_WEEKS + 1))
     print(f"\n{'=' * 80}")
-    print(f"DREU Journal Status Report — Weeks due: 1–{weeks_due}")
+    print(f"DREU Research Log Status Report — Weeks due: 1–{weeks_due}")
     print(f"{'=' * 80}")
     print(f"{'Name':<{col_w}}  {week_headers}")
     print(f"{'-' * col_w}  {'-' * (NUM_WEEKS * 5 - 2)}")
@@ -349,12 +349,12 @@ def print_report(students_results: list[dict], weeks_due: int):
 
 # ── Email notifications ───────────────────────────────────────────────────────
 
-EMAIL_SUBJECT = "DREU Research Journal — Action Required"
+EMAIL_SUBJECT = "DREU Research Log — Action Required"
 
 EMAIL_BODY = """\
 Hi {name},
 
-This is an automated reminder from the DREU program about your research journal.
+This is an automated reminder from the DREU program about your research log.
 
 The following issues were found with your log at {repo_url}:
 
